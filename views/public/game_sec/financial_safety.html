@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Scam Awareness Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #87cefa, #f3f4f6);
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            height: 90vh;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        .platform {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 200px;
+            background: radial-gradient(circle, #8B4513, #5a3215);
+        }
+        .character {
+            position: absolute;
+            bottom: 20%;
+            width: 200px;
+            height: 300px;
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+        .character.computer {
+            left: 10%;
+            background-image: url('./scammer.png');
+        }
+        .character.user {
+            right: 10%;
+            background-image: url('./farmer_char.png');
+        }
+        .bubble {
+            position: absolute;
+            top: -150px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            font-size: 16px;
+            color: #333;
+            display: none;
+        }
+        .options {
+            position: absolute;
+            bottom: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .options button {
+            padding: 10px 20px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .options button:hover {
+            background: #0056b3;
+        }
+        .consequence {
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            font-size: 16px;
+            color: #d32f2f;
+            text-align: center;
+            width: 300px;
+        }
+        .score {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 255, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 18px;
+            display: none;
+        }
+        #playAudioButton {
+            position: absolute;
+            top: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: none;
+        }
+        #playAudioButton:hover {
+            background: #0056b3;
+        }
+        #healthBarContainer {
+            position: absolute;
+            top: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #healthBar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, #76c7c0, #4CAF50);
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="platform"></div>
+        <div class="character computer">
+            <div class="bubble" id="computerBubble"></div>
+        </div>
+        <div class="character user">
+            <div class="bubble" id="userBubble"></div>
+        </div>
+        <div class="options" id="optionsContainer"></div>
+        <div class="consequence" id="consequenceBox"></div>
+        <div class="score" id="scoreBox"></div>
+        <div id="healthBarContainer">
+            <div id="healthBar"></div>
+        </div>
+    </div>
+    <audio id="quizAudio">
+        <source src="./scam_call_bank.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <button id="playAudioButton">RECIEVE</button>
+    <script>
+        const quizAudio = document.getElementById('quizAudio');
+        const playAudioButton = document.getElementById('playAudioButton');
+        const computerBubble = document.getElementById('computerBubble');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const consequenceBox = document.getElementById('consequenceBox');
+        const scoreBox = document.getElementById('scoreBox');
+        const healthBar = document.getElementById('healthBar');
+
+        let conversationIndex = 0;
+        let score = 0;
+        let health = 100;
+
+        const conversations = [
+            { message: "Welcome! This game will test your scam awareness. Ready?", answers: ['Start!', 'Exit'] },
+            {
+                message: "You receive a suspicious call. What will you do?",
+                answers: ['Share details', 'Visit the bank', 'Ignore'],
+                correctAnswer: 'Visit the bank'
+            },
+            {
+                message: "A pop-up on a website claims your device is infected. What will you do?",
+                answers: ['Download software', 'Restart device and run antivirus', 'Ignore'],
+                correctAnswer: 'Restart device and run antivirus'
+            }
+        ];
+
+        function startGame() {
+            score = 0;
+            health = 100;
+            updateHealth(0);
+            conversationIndex = 0;
+            nextConversation();
+        }
+
+        function nextConversation() {
+            if (conversationIndex < conversations.length) {
+                const convo = conversations[conversationIndex];
+                conversationIndex++;
+                displayConversation(convo);
+            } else {
+                showFinalScore();
+            }
+        }
+
+        function displayConversation(convo) {
+            computerBubble.textContent = convo.message;
+            computerBubble.style.display = 'block';
+            optionsContainer.innerHTML = '';
+            convo.answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.textContent = answer;
+                button.onclick = () => handleAnswer(answer, convo.correctAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function handleAnswer(selected, correctAnswer) {
+            if (correctAnswer === selected) {
+                score++;
+                updateHealth(10);
+                showConsequence("Correct! Good choice.");
+            } else {
+                updateHealth(-10);
+                showConsequence("Incorrect! Be cautious.");
+            }
+        }
+
+        function showConsequence(message) {
+            consequenceBox.textContent = message;
+            consequenceBox.style.display = 'block';
+            setTimeout(() => {
+                consequenceBox.style.display = 'none';
+                nextConversation();
+            }, 2000);
+        }
+
+        function updateHealth(change) {
+            health = Math.max(0, Math.min(100, health + change));
+            healthBar.style.width = `${health}%`;
+            if (health <= 0) {
+                endGame("Game Over! You ran out of health.");
+            }
+        }
+
+        function endGame(message) {
+            alert(message);
+            startGame();
+        }
+
+        function showFinalScore() {
+            scoreBox.textContent = `Your final score is: ${score}/${conversations.length}`;
+            scoreBox.style.display = 'block';
+            computerBubble.style.display = 'none';
+            optionsContainer.innerHTML = '<button onclick="startGame()">Play Again</button>';
+        }
+
+        playAudioButton.addEventListener('click', () => quizAudio.play());
+        window.onload = startGame;
+    </script>
+</body>
+</html>

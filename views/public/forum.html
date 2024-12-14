@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modern Comment Section</title>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background-color: #f1f5f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 900px;
+      margin: 40px auto;
+      background-color: #ffffff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .post {
+      margin-bottom: 30px;
+    }
+
+    .post .title {
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: #111827;
+    }
+
+    .post .body {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #6b7280;
+    }
+
+    .comments-section {
+      margin-top: 20px;
+    }
+
+    .comment {
+      margin-bottom: 15px;
+      padding: 15px;
+      background-color: #f9fafb;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .comment-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .comment-header .user-info {
+      display: flex;
+      align-items: center;
+    }
+
+    .comment-header .user-info img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .comment-header .user-info span {
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .comment-header .timestamp {
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+
+    .comment-body {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #4b5563;
+    }
+
+    .comment-footer {
+      display: flex;
+      align-items: center;
+      margin-top: 15px;
+    }
+
+    .vote-btn {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      margin-right: 15px;
+      font-size: 1.2rem;
+      color: #6b7280;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .vote-btn:hover {
+      color: #1d4ed8;
+      transform: scale(1.1);
+    }
+
+    .reply-btn {
+      background-color: #1d4ed8;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .reply-btn:hover {
+      background-color: #2563eb;
+    }
+
+    .reply-section {
+      margin-left: 40px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .reply-section .comment {
+      margin-bottom: 10px;
+    }
+
+    .reply-input {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      background-color: #f3f4f6;
+    }
+
+    .comment-form {
+      margin-top: 30px;
+    }
+
+    .comment-form textarea {
+      width: 100%;
+      padding: 15px;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background-color: #f9fafb;
+      resize: none;
+    }
+
+    .comment-form button {
+      background-color: #1d4ed8;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 10px;
+      transition: background-color 0.2s;
+    }
+
+    .comment-form button:hover {
+      background-color: #2563eb;
+    }
+
+    .nested-comment {
+      margin-left: 30px;
+    }
+
+    .highlight {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        background-color: #e5f3ff;
+      }
+      to {
+        background-color: transparent;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Main Post -->
+    <div class="post">
+      <div class="title">How do you manage unexpected expenses?</div>
+      <div class="body">Life throws unexpected expenses at us all the time. What are your strategies for handling them?</div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="comments-section" id="commentsSection">
+      <!-- Placeholder for dynamically added comments -->
+    </div>
+
+    <!-- Comment Input -->
+    <div class="comment-form">
+      <textarea id="newComment" placeholder="Write a comment..." rows="3"></textarea>
+      <button onclick="addComment()">Post Comment</button>
+    </div>
+  </div>
+
+  <script>
+    let commentId = 0;
+
+    // Function to add a comment
+    function addComment(parentId = null) {
+      const commentText = document.getElementById('newComment').value.trim();
+      if (commentText) {
+        const commentSection = document.getElementById('commentsSection');
+        const comment = document.createElement('div');
+        comment.classList.add('comment');
+        if (parentId) comment.classList.add('nested-comment');
+
+        // Comment Header
+        const header = document.createElement('div');
+        header.classList.add('comment-header');
+
+        const userInfo = document.createElement('div');
+        userInfo.classList.add('user-info');
+
+        const avatar = document.createElement('img');
+        avatar.src = "https://via.placeholder.com/40";
+        avatar.alt = "User Avatar";
+
+        const username = document.createElement('span');
+        username.textContent = "User";
+
+        userInfo.appendChild(avatar);
+        userInfo.appendChild(username);
+
+        const timestamp = document.createElement('div');
+        timestamp.classList.add('timestamp');
+        timestamp.textContent = "Just now";
+
+        header.appendChild(userInfo);
+        header.appendChild(timestamp);
+
+        // Comment Body
+        const body = document.createElement('div');
+        body.classList.add('comment-body');
+        body.textContent = commentText;
+
+        // Comment Footer
+        const footer = document.createElement('div');
+        footer.classList.add('comment-footer');
+
+        const upvote = document.createElement('div');
+        upvote.classList.add('vote-btn');
+        upvote.textContent = "↑";
+
+        const downvote = document.createElement('div');
+        downvote.classList.add('vote-btn');
+        downvote.textContent = "↓";
+
+        const replyBtn = document.createElement('button');
+        replyBtn.classList.add('reply-btn');
+        replyBtn.textContent = "Reply";
+        replyBtn.onclick = () => toggleReplyForm(comment);
+
+        footer.appendChild(upvote);
+        footer.appendChild(downvote);
+        footer.appendChild(replyBtn);
+
+        // Append everything
+        comment.appendChild(header);
+        comment.appendChild(body);
+        comment.appendChild(footer);
+
+        // Insert into the right place
+        if (parentId) {
+          parentId.appendChild(comment);
+        } else {
+          commentSection.appendChild(comment);
+        }
+
+        // Clear input
+        document.getElementById('newComment').value = '';
+      }
+    }
+
+    // Function to toggle reply form
+    function toggleReplyForm(parentComment) {
+      let replyForm = parentComment.querySelector('.reply-form');
+      if (!replyForm) {
+        replyForm = document.createElement('div');
+        replyForm.classList.add('reply-section');
+        replyForm.innerHTML = `
+          <textarea class="reply-input" placeholder="Write a reply..."></textarea>
+          <button class="reply-btn" onclick="addComment(this.parentNode.parentNode)">Post Reply</button>
+        `;
+        parentComment.appendChild(replyForm);
+      }
+      replyForm.style.display = replyForm.style.display === 'block' ? 'none' : 'block';
+    }
+  </script>
+</body>
+</html>   -FRONTEND OF DISCUSSION FORUM

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predict Credit Worthiness</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eef2f3;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .predict-container {
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 600px;
+        }
+        .predict-container h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 22px;
+            color: #333;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .form-column {
+            flex: 1;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="predict-container">
+        <h1>Predict Credit Worthiness</h1>
+        <form id="predictForm">
+            <div class="form-row">
+                <div class="form-column">
+                    <label for="crop">Crop Type</label>
+                    <select id="crop" name="crop" required>
+                        <option value="Cotton">Cotton</option>
+                        <option value="Carrot">Carrot</option>
+                        <option value="Sugarcane">Sugarcane</option>
+                        <option value="Tomato">Tomato</option>
+                        <option value="Soybean">Soybean</option>
+                        <option value="Rice">Rice</option>
+                        <option value="Maize">Maize</option>
+                        <option value="Wheat">Wheat</option>
+                        <option value="Barley">Barley</option>
+                        <option value="Potato">Potato</option>
+                    </select>
+
+                    <label for="farm_area">Farm Area (in hectares)</label>
+                    <input type="number" id="farm_area" name="farm_area" placeholder="Enter farm area" required>
+
+                    <label for="irrigation">Irrigation Method</label>
+                    <select id="irrigation" name="irrigation" required>
+                        <option value="Sprinkler">Sprinkler</option>
+                        <option value="Manual">Manual</option>
+                        <option value="Flood">Flood</option>
+                        <option value="Rain-fed">Rain-fed</option>
+                        <option value="Drip">Drip</option>
+                    </select>
+                </div>
+                <div class="form-column">
+                    <label for="fertilizer_used">Fertilizer Used (in kg)</label>
+                    <input type="number" id="fertilizer_used" name="fertilizer_used" placeholder="Enter fertilizer used" required>
+
+                    <label for="pesticide_used">Pesticide Used (in liters)</label>
+                    <input type="number" id="pesticide_used" name="pesticide_used" placeholder="Enter pesticide used" required>
+
+                    <label for="season">Season</label>
+                    <select id="season" name="season" required>
+                        <option value="Kharif">Kharif</option>
+                        <option value="Zaid">Zaid</option>
+                        <option value="Rabi">Rabi</option>
+                    </select>
+
+                    <label for="soil_type">Soil Type</label>
+                    <select id="soil_type" name="soil_type" required>
+                        <option value="Loamy">Loamy</option>
+                        <option value="Peaty">Peaty</option>
+                        <option value="Silty">Silty</option>
+                        <option value="Clay">Clay</option>
+                        <option value="Sandy">Sandy</option>
+                    </select>
+
+                    <label for="water_usage">Water Usage (in liters)</label>
+                    <input type="number" id="water_usage" name="water_usage" placeholder="Enter water usage" required>
+                </div>
+            </div>
+            <button type="submit">Predict</button>
+        </form>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('predictForm').addEventListener('submit', async function(event) {
+            event.preventDefault();  // Prevent form submission
+
+            const formData = new FormData(event.target);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            document.getElementById('result').textContent = result.prediction || 'Error';
+        });
+    </script>
+</body>
+</html>
